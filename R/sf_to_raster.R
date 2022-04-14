@@ -35,7 +35,7 @@ sf_poly_to_raster <- function(sf_obj,res = 10){
     transmute(BIN,z = sf_obj_coord$Z) %>%
     dplyr::select(BIN,z) %>%
     group_by(BIN) %>%
-    summarise(z = mean(z))
+    summarise(z = max(z))
 
   # add Z feature back to spatial object
   sf_obj <- left_join(sf_obj,sf_obj_z,by="BIN")
@@ -55,7 +55,7 @@ sf_poly_to_raster <- function(sf_obj,res = 10){
 
 lower_man_ras <-  lower_man %>%
   # some structures resist conversion from multipoly to poly
-  # and this breaks the raster conversion. I don't know why
+  # and this breaks the raster conversion. I don't know why but
   # this gets rid of them
   filter(DOITT_ID != 0) %>%
   sf_poly_to_raster()
