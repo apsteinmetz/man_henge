@@ -1,32 +1,47 @@
 # plot manhattanhenge
 library(rayshader)
+library(raster)
+library(sf)
+library(rgeos)
+library(tidyverse)
 
-ras_crop <-  lower_man_ras %>%
-  raster::crop(extent(lower_man_ras) *.2)
+lower_man <- sf::st_read("data/DA12_3D_Buildings_Multipatch.gdb.zip")
 
+lm_flat <- as_Spatial(st_zm(lower_man))
 
+extent(lm_flat)
 
-#elev_img <- raster::aggregate(lower_man_ras, fact = 3)
-elev_img <- ras_crop
+reduce_extent <- function(lmx,ratio = 0.1){
+  new_xmax = xmin(lmx) + (xmax(lmx) - xmin(lmx))*ratio
+  new_ymax = ymin(lmx) + (ymax(lmx) - ymin(lmx))*ratio
+  xmax(lmx) <- new_xmax
+  ymax(lmx) <- new_ymax
+  return(lmx)
+}
 
-elev_matrix <- matrix(
-  raster::extract(elev_img, raster::extent(elev_img), buffer = 1000),
-  nrow = ncol(elev_img),
-  ncol = nrow(elev_img)
+lm_flat_sm <- crop(lm_flat,reduce_extent(extent(lm_flat),0.1))
+
+lmx <- extent(lower_man)
+elev_matrix <- matrix(0,
+  ncol = xmax(lmx) - xmin(lmx),
+  nrow = ymax(lmx) - ymin(lmx)
 )
+
+
+# BINS <- lm_flat_sm %>%
+#   st_as_sf() %>%
+#   as_tibble %>%
+#   pull(BIN)
+#
+# lower_man_sm <- lower_man %>%
+#   filter(BIN %in% BINS)
 
 zscale = 10
 
-ambmat <- ambient_shade(elev_matrix, zscale = zscale,
-                        multicore = TRUE)
-raymat <- ray_shade(elev_matrix, sunaltitude = 45,zscale = zscale,
-                    lambert = TRUE,
-                    multicore = TRUE)
-
+rgl::clear3d()
 elev_matrix %>%
   sphere_shade(texture = "bw") %>%
-  add_shadow(raymat) %>%
-  add_shadow(ambmat) %>%
+  render_polygons(lower_man) %>%
   plot_map()
 
 #Plot in 3D
