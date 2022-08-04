@@ -1,95 +1,44 @@
 library(tidyverse)
-library(sf)
-library(fasterize)
-library(raster)
-library(stars)
-
-find_image_coordinates <-
-  function(x, y, bbox, image_width, image_height) {
-    x_img <-
-      round(image_width * (x- min(bbox$xmin, bbox$xmax)) /
-              abs(bbox$xmin - bbox$xmax))
-    y_img <-
-      round(image_height * (y - min(bbox$ymin, bbox$ymax)) /
-              abs(bbox$ymin - bbox$ymax))
-    list(x = x_img, y = y_img)
-  }
+library(rayshader)
 
 
-# 133 w 12th
-#  filter(BIN == "1010624") %>%
+#Render the county borders as polygons in Monterey Bay
+montereybay %>%
+  sphere_shade(texture = "desert") %>%
+  add_shadow(ray_shade(montereybay,zscale=50)) %>%
+  plot_3d(montereybay,water=TRUE, windowsize=800, watercolor="dodgerblue")
+render_camera(theta=140,  phi=55, zoom = 0.85, fov=30)
 
-bbox <- sf::st_bbox(lower_man)
+#We will apply a negative buffer to create space between adjacent polygons. You may
+#have to call `sf::sf_use_s2(FALSE)` before running this code to get it to run.
 
-sf_obj <-lower_man[1:100,]
+# mont_county_buff = sf::st_simplify(sf::st_buffer(monterey_counties_sf,.003), dTolerance=0.001)
+mont_county_buff = sf::st_simplify(monterey_counties_sf, dTolerance=0.001)
 
+render_polygons(mont_county_buff,
+                extent = attr(montereybay,"extent"), top=10,
+                parallel=TRUE)
+render_snapshot()
 
-sf_poly_to_raster <- function(sf_obj,res = 10){
-  # expects polygon or multipolygon geometry
+#We can specify the bottom of the polygons as well. Here I float the polygons above the surface
+#by specifying the bottom argument. We clear the previous polygons with `clear_previous = TRUE`.
+render_camera(theta=-60,  phi=20, zoom = 0.85, fov=0)
+render_polygons(mont_county_buff,
+                extent = attr(montereybay,"extent"), bottom = 190, top=200,
+                parallel=TRUE,clear_previous=TRUE)
+render_snapshot()
 
-  # reduce each builting to a single polygon
-  sf_obj <- sf_obj %>%
-    st_union(by_feature = TRUE)
+#We can set the height of the data to a column in the sf object: we'll use the land area.
+#We'll have to scale this value because it's max value is 2.6 billion:
+render_camera(theta=-60,  phi=60, zoom = 0.85, fov=30)
+render_polygons(mont_county_buff,
+                extent = attr(montereybay,"extent"), data_column_top = "ALAND",
+                scale_data = 300/(2.6E9), color="chartreuse4",
+                parallel=TRUE,clear_previous=TRUE)
+render_snapshot()
 
-  # split polygons into xyz points
-  sf_obj_pts <- sf_obj %>%
-    st_cast("POINT",warn = F)
+#This function also works with `render_highquality()`
+render_highquality(samples=400, clamp_value=10)
+rgl::rgl.close()
 
-  # extract the coordinates. We want Z
-  sf_obj_coord <-
-    sf_obj_pts %>%
-    st_coordinates %>%
-    as_tibble() %>%
-    group_by(X,Y)
-
-  # take max building height as whole building height.
-  sf_obj_z <- sf_obj_pts %>%
-    as_tibble %>%
-    transmute(BIN,z = sf_obj_coord$Z) %>%
-    dplyr::select(BIN,z) %>%
-    group_by(BIN) %>%
-    summarise(z = mean(z))
-
-  # add Z feature back to spatial object
-  sf_obj <- left_join(sf_obj,sf_obj_z,by="BIN")
-
-  # Generate empty raster layer and rasterize points
-  raster_template <- raster(crs = crs(lower_man),
-                            ext = extent(lower_man),
-                            res = res)
-
-  sf_obj_raster <- fasterize(sf_obj,
-                          raster_template,fun="max",
-                          field="z",
-                          background = 0)
-  return(sf_obj_raster)
-
-}
-
-
-# test using a subset and merge polygons into one per building
-
-
-plot(man_raster)
-
-
-img_xy <- find_image_coordinates(temp$X,temp$Y,bbox,
-                       raster_template@ncols,raster_template@nrows)
-
-
-temp_xyz <- tibble(x=img_xy$x,y=img_xy$y,z=temp$Z)
-
-temp_xyz <- temp_xyz %>%
-#  expand(x,y) %>%
-  complete(expand(temp_xyz,x,y),fill = list(z=0)) %>%
-  group_by(x,y) %>%
-  summarise(z = mean(z),.groups = "drop") %>%
-  filter(x >0,y>0) %>%
-  pull(z) %>%
-  matrix(nrow = raster_template@nrows,raster_template@ncols) %>%
-  {.}
-
-plot(temp_xyz)
-
-faster
-
+st
