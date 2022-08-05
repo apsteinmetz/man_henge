@@ -3,10 +3,10 @@ library(rayshader)
 library(rayrender)
 library(raster)
 library(sf)
-library(rgeos)
+# library(rgeos)
 library(tidyverse)
 library(osmdata)
-library(OpenStreetMap)
+# library(OpenStreetMap) # This is messed up
 
 lower_man <- sf::st_read("data/DA12_3D_Buildings_Multipatch.gdb.zip") %>%
   mutate(BIN = as.character(BIN),DOITT_ID = as.character(DOITT_ID))
@@ -58,10 +58,10 @@ load(file = "data/lm_avg.rdata")
 # Manhattan west from 19th to 26th
 # best view of Manhattanhenge is down 23rd
 
-# henge_extent <- extent(c(981000,992000,207000,214000))
+henge_extent <- extent(c(981000,992000,207000,214000))
 
 # mini to test
-henge_extent <- extent(c(981000,983000,211000,213000))
+#henge_extent <- extent(c(981000,983000,211000,213000))
 henge_bbox <- bbox(henge_extent)
 
 lm_crop <- st_crop(lm_avg,henge_extent)
@@ -105,7 +105,7 @@ elev_matrix <- matrix(
 # elev_matrix <- elev_matrix + elev_matrix_bldg
 
 # OSM overlay
-streetmap <- osmdata(henge_bbox)
+streetmap <- opq(henge_bbox)
 
 rgl::clear3d()
 elev_matrix %>%
