@@ -6,6 +6,7 @@ library(sf)
 library(tidyverse)
 # library(osmdata)
 library(geoviz)
+library(suncalc)
 
 load(file = "data/lm_avg.rdata")
 
@@ -51,7 +52,7 @@ elmat = matrix(
 # )
 # elev_matrix <- elev_matrix + elev_matrix_bldg
 
-sunangle = 270
+sunangle = 300
 zscale = 25
 
 overlay_image_toner <-
@@ -83,15 +84,15 @@ rayshader::plot_3d(
 )
 
 
-system.time(
 render_polygons(lm_crop,
                   extent = extent(lm_crop),
                   data_column_top = "Z",
                   color = "grey",
                 light_direction = sunangle,
+                light_altitude = 1,
                 scale_data = 2/(DETAIL_LEVEL),
                 parallel = FALSE)
-)
+
 render_snapshot()
 
 lmx <- extent(lower_man)
