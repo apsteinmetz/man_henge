@@ -1,12 +1,10 @@
 # plot manhattanhenge
+library(tidyverse)
 library(rayshader)
 library(rayrender)
 library(raster)
 library(sf)
-library(tidyverse)
 # library(osmdata)
-library(geoviz)
-library(suncalc)
 
 load(file = "data/lm_avg.rdata")
 
@@ -55,23 +53,24 @@ elmat = matrix(
 sunangle = 300
 zscale = 25
 
-overlay_image_toner <-
-  slippy_overlay(elev_img,
-                 image_source = "stamen",
-                 image_type = "toner",
-                 png_opacity = 0.5)
-
-overlay_image_wc <-
-  slippy_overlay(elev_img,
-                 image_source = "stamen",
-                 image_type = "watercolor",
-                 png_opacity = 0.5)
+# overlay_image_toner <-
+#   slippy_overlay(elev_img,
+#                  image_source = "stamen",
+#                  image_type = "toner",
+#                  png_opacity = 0.5)
+#
+# overlay_image_wc <-
+#   slippy_overlay(elev_img,
+#                  image_source = "stamen",
+#                  image_type = "watercolor",
+#                  png_opacity = 0.5)
 
 scene <- elmat %>%
   sphere_shade(sunangle = sunangle, texture = "bw") %>%
   # add_overlay(elevation_overlay) %>%
-  add_overlay(overlay_image_wc) %>%
-  add_overlay(overlay_image_toner)
+  # add_overlay(overlay_image_wc) %>%
+  # add_overlay(overlay_image_toner) %>%
+  {.}
 
 
 #Render the 'rayshader' scene
@@ -89,9 +88,13 @@ render_polygons(lm_crop,
                   data_column_top = "Z",
                   color = "grey",
                 light_direction = sunangle,
-                light_altitude = 1,
+                light_altitude = 45,
                 scale_data = 2/(DETAIL_LEVEL),
                 parallel = FALSE)
+
+render_highquality()
+
+render_highquality(light=TRUE,lightdirection = sunangle,lightaltitude = 45,lightcolor = "orange")
 
 render_snapshot()
 
