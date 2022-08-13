@@ -1,8 +1,12 @@
 # path render test
 library(tidyverse)
 library(raster)
+#remotes::install_github("tylermorganwall/rayrender")
 library(rayrender)
+#remotes::install_github("tylermorganwall/rayimage")
 library(rayimage)
+#remotes::install_github("tylermorganwall/rayrollercoaster")
+library(rayrollercoaster)
 
 SIZE_REDUCE = 1/30
 #view scene
@@ -42,13 +46,17 @@ for(i in 1:nrow(selected_points)) {
 
 keyscene = do.call(rbind,keylist)
 
-disk(radius=1000,y=-1,
+scene = disk(radius=1000,y=-1,
      material=diffuse(checkerperiod = 6,checkercolor="#0d401b", color="#496651")) %>%
   add_object(obj_model("data/mini_man.obj", y=-0.02, texture=TRUE, scale_obj = SIZE_REDUCE)) %>%
   add_object(sphere(y=30,z=-10,radius=5,material = light(intensity=40))) %>%
-  add_object(path(points=selected_points,width=0.1, closed = FALSE,
-                  material=diffuse(color="red"))) %>%
-  add_object(keyscene) %>%
-  render_scene(lookfrom = c(0, 10, 0), fov = 0, ortho_dimensions = c(30, 30), camera_up = c(0, 0, -1),
+  #add_object(path(points=selected_points,width=0.1, closed = FALSE,
+  #                material=diffuse(color="red"))) %>%
+  #add_object(keyscene) %>%
+  {.}
+
+  render_scene(scene,lookfrom = c(0, 10, 0), fov = 0, ortho_dimensions = c(30, 30), camera_up = c(0, 0, -1),
                width = 800, height = 800, samples = 1)
+
+  generate_rayrender_coaster(scene, fov = 120)
 
