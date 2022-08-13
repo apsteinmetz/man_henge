@@ -1,12 +1,12 @@
 # plot manhattanhenge
+library(tidyverse)
 library(rayshader)
 library(rayrender)
 library(raster)
 library(sf)
-library(tidyverse)
 # library(osmdata)
 library(geoviz)
-library(suncalc)
+# library(suncalc)
 
 load(file = "data/lm_avg.rdata")
 
@@ -105,7 +105,7 @@ render_polygons(lm_crop,
 
                 )
 
-
+save_obj("data/mini_man.obj")
 
 system.time(
 newscene <- render_highquality(lightaltitude = 30,

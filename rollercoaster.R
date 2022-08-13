@@ -27,7 +27,7 @@ disk(radius=1000,y=-1,
 library(rayimage)
 library(raster)
 plot_image("data/ggplot.png")
-vals = locator(n=20)
+vals = locator(n=8)
 vals$z = vals$y
 vals$y = rep(5,length(vals$y))
 selected_points = do.call(cbind,vals)
@@ -62,7 +62,7 @@ disk(radius=1000,y=-1,
                   material=diffuse(color="red"))) %>%
   add_object(keyscene) %>%
   render_scene(lookfrom = c(0, 10, 0), fov = 0, ortho_dimensions = c(30, 30), camera_up = c(0, 0, -1),
-               width = 800, height = 800, samples = 256)
+               width = 800, height = 800, samples = 250)
 
 
 # Now comes the only bit of iterative manual work:
