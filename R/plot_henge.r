@@ -5,11 +5,8 @@ library(rayrender)
 library(raster)
 library(sf)
 # library(osmdata)
-<<<<<<< HEAD
-=======
 library(geoviz)
 # library(suncalc)
->>>>>>> 2578cad8d80659877b0633f56f7274bd146e23c5
 
 load(file = "data/lm_avg.rdata")
 
@@ -58,7 +55,6 @@ elmat[elmat < 0] <- 0
 # )
 # elev_matrix <- elev_matrix + elev_matrix_bldg
 
-<<<<<<< HEAD
 sunangle = 300
 zscale = 25
 
@@ -73,7 +69,6 @@ zscale = 25
 #                  image_source = "stamen",
 #                  image_type = "watercolor",
 #                  png_opacity = 0.5)
-=======
 overlay_image_toner <-
   slippy_overlay(elev_img,
                  image_source = "stamen",
@@ -85,9 +80,6 @@ overlay_image_wc <-
                  image_source = "stamen",
                  image_type = "watercolor",
                  png_opacity = 0.5)
->>>>>>> 2578cad8d80659877b0633f56f7274bd146e23c5
-
-
 
 # manhattanhenge sunangle 119/299
 # manhattanhenge scene rotation (theta) 61/241
@@ -98,13 +90,10 @@ zscale = 20
 scene <- elmat %>%
   sphere_shade(sunangle = sunangle, texture = "bw") %>%
   # add_overlay(elevation_overlay) %>%
-<<<<<<< HEAD
   # add_overlay(overlay_image_wc) %>%
   # add_overlay(overlay_image_toner) %>%
-=======
   add_overlay(overlay_image_wc) %>%
   add_overlay(overlay_image_toner) %>%
->>>>>>> 2578cad8d80659877b0633f56f7274bd146e23c5
   {.}
 
 
@@ -125,7 +114,6 @@ render_polygons(lm_crop,
                   color = "grey",
                 light_direction = sunangle,
                 light_altitude = 45,
-<<<<<<< HEAD
                 scale_data = 2/(DETAIL_LEVEL),
                 parallel = FALSE)
 
@@ -133,11 +121,10 @@ render_highquality()
 
 render_highquality(light=TRUE,lightdirection = sunangle,lightaltitude = 45,lightcolor = "orange")
 
-=======
-                scale_data = .8/(DETAIL_LEVEL),
-                parallel = FALSE
-
-                )
+#                scale_data = .8/(DETAIL_LEVEL),
+#                parallel = FALSE
+#
+#                )
 
 save_obj("data/mini_man.obj")
 
@@ -150,7 +137,6 @@ newscene <- render_highquality(lightaltitude = 30,
                    camera_lookat = c(0,0,0),
                    print_scene_info = TRUE)
 )
->>>>>>> 2578cad8d80659877b0633f56f7274bd146e23c5
 render_snapshot()
 
 lmx <- extent(lower_man)
